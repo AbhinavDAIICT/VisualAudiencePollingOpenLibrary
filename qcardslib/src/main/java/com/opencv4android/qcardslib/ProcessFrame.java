@@ -1,9 +1,12 @@
 package com.opencv4android.qcardslib;
 
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
 import org.opencv.imgproc.Imgproc;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 /**
  * Created by abhinav on 28/2/16.
@@ -42,5 +45,23 @@ public class ProcessFrame {
             return tmpMat1;
         }
         else return gray;
+    }
+
+    private List<MatOfPoint> getContoursWithChild(Mat filtered) {
+        Mat hierarchy = new Mat();
+        List<MatOfPoint> mContours = new ArrayList<MatOfPoint>();
+        List<MatOfPoint> tempContours = new ArrayList<MatOfPoint>();
+        Imgproc.findContours(filtered, mContours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+        double[] data = new double[hierarchy.rows() * hierarchy.cols() * hierarchy.channels()];
+        for (int i = 0; i < mContours.size(); i++) { /* still not clear how hierarchy worked*/
+            double[] hVal = hierarchy.get(0, i); /* 3rd entry in hierarchy is child contour - http://docs.opencv.org/master/d9/d8b/tutorial_py_contours_hierarchy.html*/
+            int childId = (int) Math.round(hVal[2]);
+            if (childId > -1) { /* Add parent to tempContours list*/
+                if (!tempContours.contains(mContours.get(i))) tempContours.add(mContours.get(i)); /* Add child to tempContours list*/
+                if (!tempContours.contains(mContours.get(childId)))
+                    tempContours.add(mContours.get(childId));
+            }
+        }
+        return tempContours;
     }
 }
