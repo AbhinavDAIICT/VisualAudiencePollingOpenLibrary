@@ -104,7 +104,6 @@ public class ProcessFrame {
         }
         return goodSquareList;
     }
-
     private Point getContourCenter(MatOfPoint wrapper) {
         double moment00 = Imgproc.moments(wrapper).get_m00();
         double moment01 = Imgproc.moments(wrapper).get_m01();
@@ -113,8 +112,6 @@ public class ProcessFrame {
         double centerY = moment01 / moment00;
         return new Point(centerX, centerY);
     }
-
-
     private CenterObjects centerFix(Point p1, Mat tmp) {
         int coordinateX=0, coordinateY=0;
         double check = Math.ceil(p1.x);
@@ -173,7 +170,11 @@ public class ProcessFrame {
         CenterObjects centerAndPoints = new CenterObjects(p,coordinateX,coordinateY);
         return centerAndPoints;
     }
-
+    private Point getCentroid(Point p1, Point p2, Point p3) {
+        double cx = (p1.x + p2.x + p3.x) / 3;
+        double cy = (p1.y + p2.y + p3.y) / 3;
+        return new Point(cx, cy);
+    }
 
 
 }
