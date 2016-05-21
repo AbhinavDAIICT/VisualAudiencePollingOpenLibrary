@@ -337,5 +337,76 @@ public class ProcessFrame {
         */
         return sum;
     }
+    private Object[] decodeOption(Point p1, Point pivot, Point p3, Point hole, Point centroid) {
+        int option;
+        /*
+          The combination of valX and valY will later be used to
+          determine the option. Depending upon whether valX and valY
+          are positive or negative, we get to know the relative
+          position of the centroid with respect to the midpoint of the
+          hypotenuse
+        */
+
+        double valX = centroid.x - hole.x;
+        double valY = centroid.y - hole.y;
+
+        /*
+         * Calculating the x-distance between pivot-p1 and pivot-p3
+         */
+        int p1p = (int) (pivot.x - p1.x);
+        int p3p = (int) (pivot.x - p3.x);
+
+        /*
+         * hole will be the mid point of the id centre and pivot
+         * centre
+         */
+        Point idc = new Point(2 * hole.x - pivot.x, 2 * hole.y
+                - pivot.y);
+        // Point idNew = centerFixID
+        Double angle = (double) 0;
+        Double theta = (double) 0;
+        if (valX > 0 && valY > 0) {
+
+            option = 1;
+                    /*
+                     * swapping p1 and p3 to ensure that p3 is the left most
+                     * anchor. This is important to ensure that ID is
+                     * calculated correctly irrespective of rotation
+                     */
+            if (p1p > p3p) {
+                Point temp = p1;
+                p1 = p3;
+                p3 = temp;
+            }
+
+        } else if (valX > 0 && valY < 0) {
+            option = 4;
+            if (p1p < p3p) {
+                Point temp = p1;
+                p1 = p3;
+                p3 = temp;
+            }
+
+        } else if (valX < 0 && valY > 0) {
+            option = 2;
+            if (p1p > p3p) {
+                Point temp = p1;
+                p1 = p3;
+                p3 = temp;
+            }
+
+        } else if (valX < 0 && valY < 0) {
+            option = 3;
+
+        } else {
+            option = 5;
+        }
+
+        Object[] optionAndPoints = new Object[3];
+        optionAndPoints[0] = option;
+        optionAndPoints[1] = p1;
+        optionAndPoints[2] = p3;
+        return optionAndPoints;
+    }
 
 }
