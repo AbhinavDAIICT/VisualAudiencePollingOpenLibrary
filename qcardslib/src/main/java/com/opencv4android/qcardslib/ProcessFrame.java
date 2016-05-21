@@ -32,7 +32,12 @@ public class ProcessFrame {
         this.processSettings = processSettings;
         this.idMap = idMap;
     }
-
+    public StatsAndMat processThisFrame(Mat grayMat, Mat rgbaMat) {
+        Mat filteredMat = filterFrame(grayMat);
+        Mat displayMat = detectBlack(filteredMat, rgbaMat);
+        StatsAndMat statsAndMat = new StatsAndMat(displayMat, questionStatsMap);
+        return statsAndMat;
+    }
     private Mat filterFrame(Mat gray) {
         Mat grayMat = gray;
         Mat tmpMat1 = grayMat;
