@@ -175,6 +175,40 @@ public class ProcessFrame {
         double cy = (p1.y + p2.y + p3.y) / 3;
         return new Point(cx, cy);
     }
+    private Point[] rearrangePoints(Point p1, Point p2, Point p3, Point hole) {
+        Point pivot = new Point();
+        if ((hole.x - 2) < (p1.x + p3.x) / 2
+                && (p1.x + p3.x) / 2 < (hole.x + 2)
+                && (hole.y - 2) < (p1.y + p3.y) / 2
+                && (p1.y + p3.y) / 2 < (hole.y + 2)) {
+            pivot = p2;
+            hole.x = (p1.x + p3.x) / 2;
+            hole.y = (p1.y + p3.y) / 2;
 
+        }
+        if ((hole.x - 2) < (p2.x + p3.x) / 2
+                && (p2.x + p3.x) / 2 < (hole.x + 2)
+                && (hole.y - 2) < (p2.y + p3.y) / 2
+                && (p2.y + p3.y) / 2 < (hole.y + 2)) {
+            pivot = p1;
+            hole.x = (p2.x + p3.x) / 2;
+            hole.y = (p2.y + p3.y) / 2;
+            p1 = p2;
+            p2 = pivot;
+        }
+        if ((hole.x - 2) < (p2.x + p1.x) / 2
+                && (p2.x + p1.x) / 2 < (hole.x + 2)
+                && (hole.y - 2) < (p2.y + p1.y) / 2
+                && (p2.y + p1.y) / 2 < (hole.y + 2)) {
+            pivot = p3;
+            hole.x = (p2.x + p1.x) / 2;
+            hole.y = (p2.y + p1.y) / 2;
+            p3 = p2;
+            p2 = pivot;
+        }
+
+        Point[] arrangedPointArray = {pivot, p1, p3, hole};
+        return arrangedPointArray;
+    }
 
 }
