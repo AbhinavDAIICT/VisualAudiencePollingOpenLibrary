@@ -210,5 +210,132 @@ public class ProcessFrame {
         Point[] arrangedPointArray = {pivot, p1, p3, hole};
         return arrangedPointArray;
     }
+    private int decodeId(Point p1, Point pivot, Point p3, Point hole, Mat colorMat) {
+        Mat cardMat = colorMat;
+        Point idCenter = getIdCenter(hole, pivot);
+        //p1-pivot midpoint
+        Point m1p = new Point();
+        //p3-pivot midpoint
+        Point m3p = new Point();
+        int tempCol = 0;
+        ArrayList<Integer> tempId = new ArrayList<Integer>();
+        m1p.x = (pivot.x + p1.x) / 2;
+        m1p.y = (pivot.y + p1.y) / 2;
+        m3p.x = (pivot.x + p3.x) / 2;
+        m3p.y = (pivot.y + p3.y) / 2;
+
+        Point id1 = new Point((2 * hole.x - m1p.x),
+                (2 * hole.y - m1p.y));
+        Point id2 = new Point((2 * hole.x - m3p.x),
+                (2 * hole.y - m3p.y));
+        Point idc1 = new Point((2 * id2.x - p1.x),
+                (2 * id2.y - p1.y));
+        Point idc2 = new Point((2 * id1.x - p3.x),
+                (2 * id1.y - p3.y));
+        Point idAvg = new Point();
+
+        idAvg.x = (idCenter.x + idc1.x + idc2.x) / 3;
+        idAvg.y = (idCenter.y + idc1.y + idc2.y) / 3;
+
+        Point a0 = new Point();
+        Point a1 = new Point();
+        Point a2 = new Point();
+        Point a3 = new Point();
+        Point a4 = new Point();
+        Point a5 = new Point();
+        Point a6 = new Point();
+        Point a7 = new Point();
+
+        a0.x = (id2.x + idAvg.x) / 2;
+        a0.y = (id2.y + idAvg.y) / 2;
+
+        Integer idVal = 0;
+        if (cardMat != null) {
+
+            a7.x = (hole.x + idAvg.x) / 2;
+            a7.y = (hole.y + idAvg.y) / 2;
+
+            a1.x = (2*a0.x-a7.x);
+            a1.y = (2*a0.y-a7.y);
+
+            a6.x = (id1.x + idAvg.x) / 2;
+            a6.y = (id1.y + idAvg.y) / 2;
+
+            a4.x = (2 * idAvg.x - a0.x);
+            a4.y = (2 * idAvg.y - a0.y);
+
+            a5.x = (2 * idAvg.x - a1.x);
+            a5.y = (2 * idAvg.y - a1.y);
+
+            a2.x = (2 * idAvg.x - a6.x);
+            a2.y = (2 * idAvg.y - a6.y);
+
+            a3.x = (2 * idAvg.x - a7.x);
+            a3.y = (2 * idAvg.y - a7.y);
+
+            tempCol = (int) cardMat.get((int) idAvg.y, (int) idAvg.x)[0];
+            tempId.add(tempCol);
+
+            tempCol = (int) cardMat.get((int) a7.y, (int) a7.x)[0];
+            tempId.add(tempCol);
+
+            tempCol = (int) cardMat.get((int) a6.y, (int) a6.x)[0];
+            tempId.add(tempCol);
+
+            tempCol = (int) cardMat.get((int) a5.y, (int) a5.x)[0];
+            tempId.add(tempCol);
+
+            tempCol = (int) cardMat.get((int) a4.y, (int) a4.x)[0];
+            tempId.add(tempCol);
+
+            tempCol = (int) cardMat.get((int) a3.y, (int) a3.x)[0];
+            tempId.add(tempCol);
+
+            tempCol = (int) cardMat.get((int) a2.y, (int) a2.x)[0];
+            tempId.add(tempCol);
+
+            tempCol = (int) cardMat.get((int) a1.y, (int) a1.x)[0];
+            tempId.add(tempCol);
+
+            tempCol = (int) cardMat.get((int) a0.y, (int) a0.x)[0];
+            tempId.add(tempCol);
+
+            idVal = binary2decimal(tempId);
+        }
+        if(idMap.containsKey(String.valueOf(idVal))) {
+            idVal = Integer.parseInt(idMap.get(String.valueOf(idVal)).getMappedId());
+        } else {
+            idVal = 0;
+        }
+        return idVal;
+    }
+    private Point getIdCenter(Point hole, Point pivot) {
+        /*
+         * hole will be the mid point of the id centre and pivot
+         * centre
+         */
+        Point idCenter = new Point(2 * hole.x - pivot.x, 2 * hole.y
+                - pivot.y);
+        return idCenter;
+    }
+    private int binary2decimal(ArrayList<Integer> tempIdList){
+        int sum = 0;
+        for (int i = 0; i < tempIdList.size(); i++) {
+            int curBit = tempIdList.get(tempIdList.size()-i-1);
+            if (curBit > 0) {
+                sum += Math.pow(2,i);
+            }
+
+        }
+        /*
+        if(idMap.containsKey(sum)){
+            int decodedId = idMap.get(sum);
+            return decodedId;
+        }else{
+            return 0;
+        }
+        */
+        return sum;
+    }
 
 }
