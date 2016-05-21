@@ -1,11 +1,13 @@
 package com.opencv4android.qcardslib;
 
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.RotatedRect;
+import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
@@ -15,6 +17,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by abhinav on 28/2/16.
@@ -526,5 +529,65 @@ public class ProcessFrame {
 
         }
         return groupedCenterMap;
+    }
+    private Mat drawOptionsAndIds(Mat colorMat, Mat filteredMat, LinkedHashMap<Integer, ArrayList<Point>> groupedCenterList) {
+        int option = 0;
+        float[] radius = new float[1];
+        for (Map.Entry<Integer, ArrayList<Point>> entry : groupedCenterList.entrySet()) {
+            ArrayList<Point> cardGroupList = new ArrayList<Point>();
+            cardGroupList = entry.getValue();
+            Point p1 = cardGroupList.get(0);
+            Point p2 = cardGroupList.get(1);
+            Point p3 = cardGroupList.get(2);
+            Point[] pointArray = {p1, p2, p3};
+
+            Point centroid = getCentroid(p1, p2, p3);
+
+            /*
+            Draw a circle passing through all three points and get its
+            center. Note that the center will be the midpoint of the
+            hypotenuse of the triangle formed by points p1,p2 and p3.
+            */
+            MatOfPoint2f pMat = new MatOfPoint2f(pointArray);
+            Point hole = new Point();
+            Imgproc.minEnclosingCircle(pMat, hole, radius);
+
+            Point[] arrangedPointArray = rearrangePoints(p1, p2, p3, hole);
+            p1 = arrangedPointArray[1];
+            Point pivot = arrangedPointArray[0];
+            p3 = arrangedPointArray[2];
+            hole = arrangedPointArray[3];
+
+            Object[] optionAndPoints = decodeOption(p1, pivot, p3, hole, centroid);
+            option = (int) optionAndPoints[0];
+            p1 = (Point) optionAndPoints[1];
+            p3 = (Point) optionAndPoints[2];
+
+            int id = decodeId(p1, pivot, p3, hole, filteredMat);
+            Core.putText(colorMat, String.valueOf(id), hole,
+                    Core.FONT_HERSHEY_SIMPLEX, 1,
+                    new Scalar(0, 0, 255), 1);
+
+            option = getMappedOption(option, id);
+            questionStatsMap.put(id, option);
+
+            Core.putText(colorMat, "p1", p1,
+                    Core.FONT_HERSHEY_SIMPLEX, 1,
+                    new Scalar(0, 0, 255), 2);
+            Core.putText(colorMat, "p3", p3,
+                    Core.FONT_HERSHEY_SIMPLEX, 1,
+                    new Scalar(0, 0, 255), 2);
+            Core.putText(colorMat, String.valueOf(option), pivot,
+                    Core.FONT_HERSHEY_SIMPLEX, 1,
+                    new Scalar(0, 255, 0), 1);
+        }
+        return colorMat;
+    }
+    private int getMappedOption(int option, int id) {
+        if (idMap.containsKey(String.valueOf(id))) {
+            return idMap.get(String.valueOf(id)).getMappedOption(option);
+        } else {
+            return 5;
+        }
     }
 }
