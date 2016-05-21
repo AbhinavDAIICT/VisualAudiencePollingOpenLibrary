@@ -1,11 +1,16 @@
 package com.opencv4android.qcardslib;
 
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
+import org.opencv.core.RotatedRect;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -65,7 +70,40 @@ public class ProcessFrame {
         }
         return tempContours;
     }
-
+    private List<GoodSquare> populateUsefulContourList(List<MatOfPoint> tempContours, Mat filtered, Mat colorMat) {
+        List<GoodSquare> goodSquareList = new ArrayList<GoodSquare>();
+        Iterator<MatOfPoint> each1 = tempContours.iterator();
+        while (each1.hasNext()) {
+            MatOfPoint wrapper = each1.next();
+            MatOfPoint2f rotatedRectangleMat = new MatOfPoint2f();
+            MatOfPoint wrapRotate = wrapper;
+            wrapRotate.convertTo(rotatedRectangleMat, CvType.CV_32FC2);
+            RotatedRect rotated = Imgproc.minAreaRect(rotatedRectangleMat); /* Calculate important parameters for contours size contains width and height of the rotated rectangle*/
+            Size sizeRect = rotated.size;
+            if ((sizeRect.height / sizeRect.width) > 0.7 && (sizeRect.height / sizeRect.width) < 1.3) {
+                if ((sizeRect.height * sizeRect.width) < 1.4 * Imgproc.contourArea(wrapper)) {
+                    Point detectedCenter = getContourCenter(wrapper);
+                    CenterObjects centerAndPoints = centerFix(detectedCenter, filtered);
+                    Point fixedCenter = centerAndPoints.getCenter();
+                    int fixedCenterX = centerAndPoints.getCenterX();
+                    int fixedCenterY = centerAndPoints.getCenterY();
+                    if (filtered.get(fixedCenterY, fixedCenterX)[0] == 0) {
+                        double perimeter = Imgproc.arcLength(rotatedRectangleMat, true);
+                        double area = Imgproc.contourArea(wrapper);
+                        GoodSquare goodSquare = new GoodSquare();
+                        goodSquare.area = area;
+                        goodSquare.perimeter = perimeter;
+                        goodSquare.detectedCenter = detectedCenter;
+                        goodSquare.fixedCenter = fixedCenter;
+                        goodSquare.fixedCenterX = fixedCenterX;
+                        goodSquare.fixedCenterY = fixedCenterY;
+                        goodSquareList.add(goodSquare);
+                    }
+                }
+            }
+        }
+        return goodSquareList;
+    }
 
     private Point getContourCenter(MatOfPoint wrapper) {
         double moment00 = Imgproc.moments(wrapper).get_m00();
@@ -135,6 +173,7 @@ public class ProcessFrame {
         CenterObjects centerAndPoints = new CenterObjects(p,coordinateX,coordinateY);
         return centerAndPoints;
     }
+
 
 
 }
