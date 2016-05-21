@@ -590,4 +590,20 @@ public class ProcessFrame {
             return 5;
         }
     }
+    private Mat detectBlack(Mat filtered, Mat colorMat) {
+        Integer totContours = 0;
+        Integer finContours = 0; /* finding contours with child*/
+        List<MatOfPoint> tempContours = getContoursWithChild(filtered); /*From tempContours select the rectangles with white centers*/
+        List<GoodSquare> goodSquareList = populateUsefulContourList(tempContours, filtered, colorMat);
+        Mat mat = colorMat; /* finding the potential neighbours for each contour*/
+        LinkedHashMap<Integer, ArrayList<Point>> groupedCenterList = groupNeighbors(goodSquareList); /* Group the neighbours, identify options and draw contours*/
+        try {
+            mat = drawOptionsAndIds(colorMat, filtered, groupedCenterList);
+        } catch (NullPointerException e) {
+            System.out.println("Exception" + e);
+        }
+        if (mat != null) return mat;
+        else return colorMat;
+    }
+
 }
