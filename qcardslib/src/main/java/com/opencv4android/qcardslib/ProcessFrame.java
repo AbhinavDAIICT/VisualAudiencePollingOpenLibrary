@@ -77,5 +77,64 @@ public class ProcessFrame {
     }
 
 
+    private CenterObjects centerFix(Point p1, Mat tmp) {
+        int coordinateX=0, coordinateY=0;
+        double check = Math.ceil(p1.x);
+        int checkX = (int) (check * 10);
+        int checkedX = checkX / 10;
+        int tempX = checkedX;
+        double check2 = Math.ceil(p1.y);
+        int checkY = (int) (check2 * 10);
+        int checkedY = checkY / 10;
+        int tempY = checkedY;
+        int left = 0;
+        int right = 0;
+        int up = 0;
+        int down = 0;
+        int checkVal = 0;
+        if (tmp.get(checkedY, checkedX)[0] == 0) {
+            checkVal = 0;
+        } else {
+            checkVal = 1;
+        }
+        while (tmp.get(checkedY, checkedX)[0] == checkVal) {
+            left++;
+            checkedX -= 1;
+        }
+        checkedX = tempX;
+
+        while (tmp.get(checkedY, checkedX)[0] == checkVal) {
+            right++;
+            checkedX += 1;
+        }
+        if (Math.abs(right - left) > 1) {
+            checkedX = tempX;
+            int pw = tempX + ((right - left) / 2);
+            p1.x = pw;
+            coordinateX = pw;
+        }
+
+        while (tmp.get(checkedY, checkedX)[0] == checkVal) {
+            up++;
+            checkedY -= 1;
+        }
+        checkedY = tempY;
+
+        while (tmp.get(checkedY, checkedX)[0] == checkVal) {
+            down++;
+            checkedY += 1;
+        }
+        if (Math.abs(up - down) > 1) {
+            checkedY = tempY;
+            int pw = tempY + ((down - up) / 2);
+            p1.y = pw;
+            coordinateY = pw;
+        }
+
+        Point p = new Point(p1.x, p1.y);
+        CenterObjects centerAndPoints = new CenterObjects(p,coordinateX,coordinateY);
+        return centerAndPoints;
+    }
+
 
 }
