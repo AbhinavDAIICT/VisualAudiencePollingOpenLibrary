@@ -2,6 +2,7 @@ package com.opencv4android.qcardslib;
 
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.Point;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
@@ -64,4 +65,17 @@ public class ProcessFrame {
         }
         return tempContours;
     }
+
+
+    private Point getContourCenter(MatOfPoint wrapper) {
+        double moment00 = Imgproc.moments(wrapper).get_m00();
+        double moment01 = Imgproc.moments(wrapper).get_m01();
+        double moment10 = Imgproc.moments(wrapper).get_m10();
+        double centerX = moment10 / moment00;
+        double centerY = moment01 / moment00;
+        return new Point(centerX, centerY);
+    }
+
+
+
 }
