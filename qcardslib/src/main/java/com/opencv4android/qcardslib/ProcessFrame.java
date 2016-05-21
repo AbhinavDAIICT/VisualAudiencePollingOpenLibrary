@@ -10,6 +10,8 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -52,7 +54,6 @@ public class ProcessFrame {
         }
         else return gray;
     }
-
     private List<MatOfPoint> getContoursWithChild(Mat filtered) {
         Mat hierarchy = new Mat();
         List<MatOfPoint> mContours = new ArrayList<MatOfPoint>();
@@ -408,5 +409,122 @@ public class ProcessFrame {
         optionAndPoints[2] = p3;
         return optionAndPoints;
     }
+    private LinkedHashMap<Integer, ArrayList<Point>> groupNeighbors(List<GoodSquare> goodSquareList) {
+        //cardMap = new LinkedHashMap<Integer, ArrayList<Integer>>();
+        LinkedHashMap<Integer, ArrayList<Point>> groupedCenterMap = new LinkedHashMap<Integer, ArrayList<Point>>();
+        Point[] centerArray = new Point[goodSquareList.size()];
+        List<Point> centerList = new ArrayList<Point>(goodSquareList.size());
+        Iterator<GoodSquare> iterator = goodSquareList.iterator();
+        int i = 0;
+        while (iterator.hasNext()) {
+            Point center = iterator.next().fixedCenter;
+            centerArray[i] = center;
+            centerList.add(center);
+            i++;
+        }
+        // Sort the array based on the x coordinate of the centres
+        // Since points contain both x and y values, we need comparator to sort
+        // them according to x values
+        Arrays.sort(centerArray, new Comparator<Point>() {
+            public int compare(Point a, Point b) {
+                int xComp = Double.compare(a.x, b.x);
+                if (xComp == 0)
+                    return Double.compare(a.y, b.y);
+                    // try removing y comparison and check effects
+                else
+                    return xComp;
+            }
+        });
+        // get the ids of the contours in the sorted order
+        int[] ids = new int[centerList.size()];
+        for (i = 0; i < centerList.size(); i++) {
+            ids[i] = centerList.indexOf(centerArray[i]);
+        }
 
+        int counter = 0;
+
+        // rem will contain the ids that will be needed to be removed later
+        ArrayList<Integer> rem = new ArrayList<Integer>();
+        for (i = 0; i < centerList.size(); i++) {
+            ArrayList<Integer> cardList = new ArrayList<Integer>();
+            ArrayList<Point> groupedCenterList = new ArrayList<Point>();
+            // cardList.add(0);
+            ArrayList<Point> tempList = new ArrayList<Point>();
+            ArrayList<Integer> tempId = new ArrayList<Integer>();
+
+            // scale = length of a side
+            double scale = goodSquareList.get(ids[i]).getPerimeter() / 4;
+            if (!rem.contains(ids[i])) {
+
+                // Finding potential neighbour centers in x+ direction
+                for (int j = i; j < centerList.size()
+                        && Math.abs(centerArray[i].x - centerArray[j].x) < 2 * scale; j++) {
+                    double iArea = goodSquareList.get(ids[i]).getArea();
+                    double jArea = goodSquareList.get(ids[j]).getArea();
+
+					/*
+                     * Area constraint important to check. It will eliminate too
+					 * small or too big contours If area constraint is met, add
+					 * the contour id to tempId and add the center to tempList
+					 */
+                    if (iArea < 1.2 * jArea && iArea > 0.8 * jArea) {
+                        tempId.add(ids[j]);
+                        tempList.add(centerArray[j]);
+                    }
+                }
+
+                // Finding potential neighbor centers in x- direction
+                for (int j = i - 1; j > 0
+                        && Math.abs(centerArray[i].x - centerArray[j].x) < 2 * scale; j--) {
+                    double iArea = goodSquareList.get(ids[i]).getArea();
+                    double jArea = goodSquareList.get(ids[j]).getArea();
+                    if (iArea < 1.2 * jArea && iArea > 0.8 * jArea) {
+                        tempId.add(ids[j]);
+                        tempList.add(centerArray[j]);
+                    }
+
+                }
+
+				/*
+                 * After the above two loops, we get a set of all potential
+				 * neighbouring contours for contour with id 'i' based on the
+				 * value of their x-coordinate. It can be imagined as a column in
+				 * the image
+				 */
+
+				/*
+				 * The 'for' loop below searches for the potential neighbours in
+				 * the column obtained in the last two 'for' loops.
+				 */
+
+                for (Integer j = 0; j < tempList.size(); j++) {
+
+					/*
+					 * Checking in the column, if the y-coordinates are in
+					 * permissible range then add the index of the contour to the
+					 * cardList and also add it to the rem list so that we do not
+					 * process it again
+					 */
+                    if (Math.abs(centerArray[i].y - tempList.get(j).y) < 2 * scale) {
+                        cardList.add(centerList.indexOf(tempList.get(j)));
+                        groupedCenterList.add(tempList.get(j));
+                        rem.add(centerList.indexOf(tempList.get(j)));
+                    }
+                }
+
+				/*
+				 * Maintain a cardMap to hold the cardLists. cardMap holds
+				 * only those cardLists which have more than 2 elements as we
+				 * require at least three squares for a valid pattern
+				 */
+                if (cardList.size() > 2) {
+                    //cardMap.put(counter, cardList);
+                    groupedCenterMap.put(counter, groupedCenterList);
+                    counter++;
+                }
+            }
+
+        }
+        return groupedCenterMap;
+    }
 }
