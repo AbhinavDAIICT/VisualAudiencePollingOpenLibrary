@@ -13,6 +13,11 @@ import java.util.StringTokenizer;
  */
 public class FileOperations {
 
+    /**
+     * Method to read idMap from assets
+     * @param context activity context
+     * @return id-mappedObjects mapping
+     */
     public static LinkedHashMap<String, MappedObjects> readIdMap(Context context){
         LinkedHashMap<String, MappedObjects> idMap = new LinkedHashMap<>();
         BufferedReader reader = null;

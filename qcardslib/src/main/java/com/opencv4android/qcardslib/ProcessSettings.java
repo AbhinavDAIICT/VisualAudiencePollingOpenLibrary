@@ -10,6 +10,14 @@ public class ProcessSettings {
     boolean idBool;
     boolean answerBool;
 
+    /**
+     * setting various settings boolean
+     * @param adaptiveBool boolean for toggling adaptive threshold
+     * @param highlightBool boolean for toggling card highlight
+     * @param invertBool boolean for toggling invert image
+     * @param idBool boolean for toggling card id display
+     * @param answerBool boolean for toggling option display
+     */
     public ProcessSettings(boolean adaptiveBool, boolean highlightBool, boolean invertBool, boolean idBool, boolean answerBool) {
         this.adaptiveBool = adaptiveBool;
         this.highlightBool = highlightBool;
@@ -18,6 +26,9 @@ public class ProcessSettings {
         this.answerBool = answerBool;
     }
 
+    /**
+     * @return value of adaptiveBool
+     */
     public boolean isAdaptiveBool() {
         return adaptiveBool;
     }
