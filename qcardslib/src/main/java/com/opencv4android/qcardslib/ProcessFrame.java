@@ -569,22 +569,29 @@ public class ProcessFrame {
             p3 = (Point) optionAndPoints[2];
 
             int id = decodeId(p1, pivot, p3, hole, filteredMat);
-            Core.putText(colorMat, String.valueOf(id), hole,
-                    Core.FONT_HERSHEY_SIMPLEX, 1,
-                    new Scalar(0, 0, 255), 1);
+            if (processSettings.idBool) {
+                Point idCenter = getIdCenter(hole, pivot);
+                Core.putText(colorMat, String.valueOf(id), idCenter,
+                        Core.FONT_HERSHEY_SIMPLEX, 0.5,
+                        new Scalar(0, 255, 0), 2);
+            }
 
             option = getMappedOption(option, id);
             questionStatsMap.put(id, option);
 
+/*
             Core.putText(colorMat, "p1", p1,
                     Core.FONT_HERSHEY_SIMPLEX, 1,
                     new Scalar(0, 0, 255), 2);
             Core.putText(colorMat, "p3", p3,
                     Core.FONT_HERSHEY_SIMPLEX, 1,
                     new Scalar(0, 0, 255), 2);
-            Core.putText(colorMat, String.valueOf(option), pivot,
-                    Core.FONT_HERSHEY_SIMPLEX, 1,
-                    new Scalar(0, 255, 0), 1);
+*/
+            if (processSettings.answerBool) {
+                Core.putText(colorMat, String.valueOf(option), hole,
+                        Core.FONT_HERSHEY_SIMPLEX, 0.6,
+                        new Scalar(0, 0, 255), 2);
+            }
         }
         return colorMat;
     }
