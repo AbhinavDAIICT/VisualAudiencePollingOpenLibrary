@@ -25,5 +25,5 @@ buildscript {
  (NOTE: Replace **0.9.+** with latest gradle version)
 
 ## Setup OpenCV
-1. Follow steps at [this link](http://stackoverflow.com/questions/17767557/how-to-use-opencv-in-android-studio-using-gradle-build-tool)
+1. Follow steps at [this link](http://stackoverflow.com/questions/27406303/opencv-in-android-studio)
 (NOTE: use openCV version 2.4.10 for this project)
