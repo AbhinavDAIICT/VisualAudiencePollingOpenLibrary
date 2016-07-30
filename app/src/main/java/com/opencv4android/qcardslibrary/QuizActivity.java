@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.SurfaceView;
 
 import com.opencv4android.qcardslib.FileOperations;
+import com.opencv4android.qcardslib.IdMapReader;
 import com.opencv4android.qcardslib.MappedObjects;
 import com.opencv4android.qcardslib.ProcessFrame;
 import com.opencv4android.qcardslib.ProcessSettings;
@@ -20,7 +21,7 @@ import org.opencv.core.Mat;
 
 import java.util.LinkedHashMap;
 
-public class QuizActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
+public class QuizActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2, IdMapReader {
     SharedPreferences preferences;
     LinkedHashMap<String, MappedObjects> idMap = new LinkedHashMap<>();
     private CameraBridgeViewBase mOpenCvCameraView;
@@ -51,9 +52,6 @@ public class QuizActivity extends AppCompatActivity implements CameraBridgeViewB
         prepareIdMap();
     }
 
-    public void prepareIdMap() {
-        idMap = FileOperations.readIdMap(this);
-    }
 
     @Override
     public void onCameraViewStarted(int width, int height) {
@@ -96,5 +94,9 @@ public class QuizActivity extends AppCompatActivity implements CameraBridgeViewB
     }
 
 
+    @Override
+    public void prepareIdMap() {
+        idMap = FileOperations.readIdMap(this);
+    }
 
 }
